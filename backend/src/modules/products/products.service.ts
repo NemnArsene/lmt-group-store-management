@@ -17,7 +17,7 @@ export class ProductsService extends BaseService<
   ProductDocument,
   ProductsRepository
 > {
-  constructor(protected readonly repository: ProductsRepository) {
+  constructor(repository: ProductsRepository) {
     super(repository);
   }
 

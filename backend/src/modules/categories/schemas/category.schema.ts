@@ -5,10 +5,10 @@ export type CategoryDocument = Category & Document;
 
 @Schema({ timestamps: true, collection: 'categories' })
 export class Category {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, type: String })
   name: string;
 
-  @Prop({ default: true })
+  @Prop({ default: true, type: Boolean })
   isActive: boolean;
 }
 

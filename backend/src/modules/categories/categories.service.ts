@@ -6,7 +6,7 @@ import { ConflictException } from '@common/exceptions/domain.exceptions.js';
 
 @Injectable()
 export class CategoriesService extends BaseService<CategoryDocument, CategoriesRepository> {
-  constructor(protected readonly repository: CategoriesRepository) {
+  constructor(repository: CategoriesRepository) {
     super(repository);
   }
 

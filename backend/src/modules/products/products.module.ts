@@ -5,11 +5,13 @@ import { ProductsService } from './products.service.js';
 import { ProductsRepository } from './products.repository.js';
 import { Product, ProductSchema } from './schemas/product.schema.js';
 import { CloudinaryModule } from '@infrastructure/cloudinary/cloudinary.module.js';
+import { CategoriesModule } from '../categories/categories.module.js';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
     CloudinaryModule,
+    CategoriesModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService, ProductsRepository],

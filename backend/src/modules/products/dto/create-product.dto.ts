@@ -1,4 +1,5 @@
 import {
+  IsIn,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
@@ -24,6 +25,11 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0)
   price: number;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['Frs CFA', 'EUR', 'USD', 'GBP'])
+  currency?: string;
 
   @IsNumber()
   @Min(0)

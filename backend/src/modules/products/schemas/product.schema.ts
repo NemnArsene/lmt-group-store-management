@@ -17,6 +17,9 @@ export class Product {
   @Prop({ required: true, min: 0, type: Number })
   price: number;
 
+  @Prop({ default: 'Frs CFA', type: String })
+  currency: string;
+
   @Prop({ required: true, min: 0, default: 0, type: Number })
   quantity: number;
 

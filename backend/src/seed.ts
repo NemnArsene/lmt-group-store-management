@@ -41,6 +41,7 @@ async function bootstrap() {
         sku: `SKU-${faker.string.alphanumeric(8).toUpperCase()}-${i}`,
         description: faker.commerce.productDescription(),
         price: parseFloat(faker.commerce.price({ min: 10, max: 1000 })),
+        currency: 'Frs CFA',
         quantity: faker.number.int({ min: 0, max: 500 }),
         categoryId: randomCategory!._id.toString(),
       });

@@ -36,3 +36,5 @@ coverage/
 
 # Divers
 backend/tsconfig.tsbuildinfo
+backend/tsconfig.build.tsbuildinfo
+tsconfig.build.tsbuildinfo

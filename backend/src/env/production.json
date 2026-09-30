@@ -1,0 +1,10 @@
+{
+  "env": "production",
+  "swagger": {
+    "enabled": false
+  },
+  "logging": {
+    "level": "warn",
+    "format": "json"
+  }
+}

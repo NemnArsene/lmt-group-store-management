@@ -1,0 +1,10 @@
+{
+  "env": "staging",
+  "swagger": {
+    "enabled": true
+  },
+  "logging": {
+    "level": "info",
+    "format": "json"
+  }
+}

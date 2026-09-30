@@ -1,0 +1,6 @@
+{
+  "env": "development",
+  "logging": {
+    "level": "debug"
+  }
+}

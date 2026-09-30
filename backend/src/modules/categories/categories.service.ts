@@ -3,10 +3,14 @@ import { BaseService } from '@common/base/base.service.js';
 import { CategoryDocument } from './schemas/category.schema.js';
 import { CategoriesRepository } from './categories.repository.js';
 import { ConflictException } from '@common/exceptions/domain.exceptions.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CategoriesService extends BaseService<CategoryDocument, CategoriesRepository> {
-  constructor(repository: CategoriesRepository) {
+  constructor(
+    repository: CategoriesRepository,
+    private readonly eventEmitter: EventEmitter2,
+  ) {
     super(repository);
   }
 
@@ -20,5 +24,10 @@ export class CategoriesService extends BaseService<CategoryDocument, CategoriesR
 
   async findAllCategories(): Promise<CategoryDocument[]> {
     return this.repository.findPaginated({ isActive: true }, { page: 1, limit: 1000 }).then(res => res.data);
+  }
+
+  async softDelete(id: string): Promise<void> {
+    await super.softDelete(id);
+    this.eventEmitter.emit('category.deleted', id);
   }
 }

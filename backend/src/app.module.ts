@@ -13,9 +13,11 @@ import {
 import { CloudinaryModule } from '@infrastructure/cloudinary/cloudinary.module.js';
 import { ProductsModule } from '@modules/products/products.module.js';
 import { CategoriesModule } from '@modules/categories/categories.module.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, loggerConfig, swaggerConfig],

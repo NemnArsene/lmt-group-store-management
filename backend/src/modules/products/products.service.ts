@@ -12,6 +12,7 @@ import {
 } from '@common/exceptions/domain.exceptions.js';
 import type { PaginatedResult } from '@common/interfaces/paginated-result.interface.js';
 import { CategoriesService } from '../categories/categories.service.js';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ProductsService extends BaseService<
@@ -93,5 +94,11 @@ export class ProductsService extends BaseService<
     }
 
     await this.repository.softDelete(id);
+  }
+
+  @OnEvent('category.deleted')
+  async handleCategoryDeleted(categoryId: string) {
+    this.logger.log(`Category ${categoryId} soft-deleted. Cascading soft-delete to related products.`);
+    await this.repository.softDeleteByCategory(categoryId);
   }
 }

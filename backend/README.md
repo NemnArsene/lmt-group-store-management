@@ -282,6 +282,18 @@ docker compose up --build
 
 La spécification cible un test technique de 3h. L'authentification ajouterait de la complexité sans apporter de valeur sur les critères évalués (qualité du code, performance des requêtes, validation, gestion des erreurs, README). La décision est documentée ici pour montrer qu'elle est **réfléchie**, pas omise.
 
+
+### Améliorations Futures (Nice-to-haves pour la production)
+
+Pour transformer ce MVP en un système e-commerce totalement robuste à grande échelle, voici les évolutions recommandées (non incluses pour rester dans le périmètre des 3h) :
+
+1. **Tableau d'images (Galerie)** : Au lieu d'une unique `imageUrl`, l'entité Produit pourrait utiliser un tableau d'URLs (`images: string[]`) pour gérer une galerie complète.
+2. **Gestion des Variantes (SKU Dérivés)** : Gestion d'entités enfants "Variantes" pour les tailles et couleurs, possédant chacune leur propre stock et modificateur de prix.
+3. **Logique de Stock Avancée** : Mettre en place un système de "Mouvements de stock" (Inventory Ledger : Entrée, Sortie, Réservation) au lieu de simples incréments/décréments, garantissant une parfaite traçabilité.
+4. **Authentification & Rôles** : Ajouter JWT et Guards NestJS pour restreindre la création/édition au rôle `ADMIN`, et la lecture aux utilisateurs normaux.
+
+---
+
 ### Pourquoi pas de Clean Architecture stricte (ports/adapters) ?
 
 YAGNI. Le projet a un seul adaptateur (MongoDB via Mongoose). Ajouter des interfaces abstraites et des couches de mapping n'apporterait que du boilerplate sans bénéfice concret. Le pattern Repository + Service appliqué ici est le juste milieu entre découplage et pragmatisme.

@@ -16,4 +16,8 @@ export class ProductsRepository extends BaseRepository<ProductDocument> {
   async findBySku(sku: string): Promise<ProductDocument | null> {
     return this.findOne({ sku });
   }
+
+  async softDeleteByCategory(categoryId: string): Promise<void> {
+    await this.productModel.updateMany({ categoryId }, { isActive: false }).exec();
+  }
 }

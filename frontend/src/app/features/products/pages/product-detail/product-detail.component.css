@@ -1,0 +1,167 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.breadcrumb h2 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--asphalt);
+  font-size: 22px;
+}
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 80px;
+}
+.detail-container {
+  display: flex;
+  gap: 32px;
+  background: var(--surface-card);
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+}
+.image-section {
+  flex: 0 0 300px;
+  height: 300px;
+  background: var(--surface-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-light);
+}
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted-text);
+}
+.image-placeholder mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #c5c5c5;
+}
+.info-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.product-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--asphalt);
+  margin: 0;
+}
+.product-sku {
+  font-family: 'Courier New', monospace;
+  color: var(--muted-text);
+  margin: 0 0 24px 0;
+}
+.price-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-light);
+}
+.price-label {
+  font-size: 13px;
+  color: var(--muted-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.price-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--drive-orange);
+}
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.detail-item .label {
+  font-size: 13px;
+  color: var(--muted-text);
+}
+.detail-item .value {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--asphalt);
+}
+.category-pill {
+  background: rgba(232, 93, 4, 0.08);
+  color: var(--drive-deep) !important;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  display: inline-block;
+  width: fit-content;
+}
+.description-section {
+  margin-bottom: 32px;
+}
+.description-section h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: var(--asphalt);
+}
+.description-text {
+  color: #555;
+  line-height: 1.6;
+}
+.meta-section {
+  margin-top: auto;
+  font-size: 12px;
+  color: var(--muted-text);
+  border-top: 1px solid var(--border-light);
+  padding-top: 16px;
+}
+mat-chip.active {
+  background-color: var(--success-green) !important;
+  color: white !important;
+}
+mat-chip.inactive {
+  background-color: var(--danger-red) !important;
+  color: white !important;
+}
+@media (max-width: 768px) {
+  .detail-container {
+    flex-direction: column;
+  }
+  .image-section {
+    flex: none;
+    width: 100%;
+  }
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,121 @@
+<div class="header">
+  <h2>Product list page</h2>
+  <div class="actions">
+    <button mat-flat-button color="primary" routerLink="/products/new">
+      <mat-icon>add</mat-icon> New Product
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- Sidebar Filters -->
+  <aside class="sidebar">
+    <div class="filter-section">
+      <h3>Filters</h3>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Category</mat-label>
+        <mat-select (selectionChange)="onCategoryChange($event.value)" [value]="facade.filters().categoryId">
+          <mat-option [value]="undefined">All Categories</mat-option>
+          @for (cat of facade.categories(); track cat._id) {
+            <mat-option [value]="cat._id">{{ cat.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Status</mat-label>
+        <mat-select (selectionChange)="onStatusChange($event.value)" [value]="facade.filters().isActive">
+          <mat-option [value]="undefined">All</mat-option>
+          <mat-option [value]="true">Active</mat-option>
+          <mat-option [value]="false">Non Active</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Sort By</mat-label>
+        <mat-select (selectionChange)="onSortChange($event.value)" [value]="facade.filters().sortBy">
+          <mat-option value="createdAt">Date (Newest)</mat-option>
+          <mat-option value="price">Price</mat-option>
+          <mat-option value="name">Name</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content-area">
+
+    <div class="top-bar">
+      <mat-form-field appearance="outline" class="search-bar">
+        <mat-label>Search product...</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [formControl]="searchControl" placeholder="SKU or Name">
+      </mat-form-field>
+    </div>
+
+    @if (facade.isLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+
+    @if (!facade.isLoading() && facade.products().length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">inventory_2</mat-icon>
+        <p>No products found matching your filters.</p>
+      </div>
+    }
+
+    @if (!facade.isLoading() && facade.products().length > 0) {
+      <div class="product-grid">
+        @for (product of facade.products(); track product._id) {
+          <mat-card class="product-card">
+            <div class="status-indicator" [class.active]="product.isActive" [class.inactive]="!product.isActive"
+                 [matTooltip]="product.isActive ? 'Active' : 'Inactive'">
+            </div>
+            <div class="card-image-container" [routerLink]="['/products', product._id]">
+              @if (product.imageUrl) {
+                <img [src]="product.imageUrl" alt="{{ product.name }}" class="card-image">
+              } @else {
+                <div class="card-image-placeholder">
+                  <mat-icon>inventory_2</mat-icon>
+                </div>
+              }
+            </div>
+            <mat-card-content [routerLink]="['/products', product._id]" style="cursor: pointer;">
+              <div class="product-name" [matTooltip]="product.name">{{ product.name }}</div>
+              <div class="product-sku">{{ product.sku }}</div>
+              <div class="product-price-row">
+                <span class="price">{{ product.price | number:'1.0-0' }} {{ product.currency }}</span>
+                <span class="qty">Qty: {{ product.quantity }}</span>
+              </div>
+              <div class="product-category">{{ getCategoryName(product.categoryId) }}</div>
+            </mat-card-content>
+            <mat-card-actions class="card-actions">
+              <button mat-icon-button color="primary" [routerLink]="['/products', product._id, 'edit']" matTooltip="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="deleteProduct(product._id)" matTooltip="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    }
+
+    @if (facade.totalProducts() > 0) {
+      <div class="paginator-container">
+        <mat-paginator
+          [length]="facade.totalProducts()"
+          [pageSize]="facade.filters().limit"
+          [pageSizeOptions]="[8, 16, 24]"
+          [pageIndex]="facade.filters().page - 1"
+          (page)="onPageChange($event)"
+          aria-label="Select page">
+        </mat-paginator>
+      </div>
+    }
+  </div>
+</div>

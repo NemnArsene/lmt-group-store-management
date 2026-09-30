@@ -35,6 +35,10 @@ export class CreateProductDto {
   @Min(0)
   quantity: number;
 
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
   @IsMongoId()
   categoryId: string;
 }

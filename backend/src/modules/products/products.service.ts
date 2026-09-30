@@ -13,6 +13,7 @@ import {
 import type { PaginatedResult } from '@common/interfaces/paginated-result.interface.js';
 import { CategoriesService } from '../categories/categories.service.js';
 import { OnEvent } from '@nestjs/event-emitter';
+import { CloudinaryService } from '@infrastructure/cloudinary/cloudinary.service.js';
 
 @Injectable()
 export class ProductsService extends BaseService<
@@ -22,6 +23,7 @@ export class ProductsService extends BaseService<
   constructor(
     repository: ProductsRepository,
     private readonly categoriesService: CategoriesService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {
     super(repository);
   }
@@ -100,5 +102,13 @@ export class ProductsService extends BaseService<
   async handleCategoryDeleted(categoryId: string) {
     this.logger.log(`Category ${categoryId} soft-deleted. Cascading soft-delete to related products.`);
     await this.repository.softDeleteByCategory(categoryId);
+  }
+
+  async uploadProductImage(file: Express.Multer.File) {
+    const result = await this.cloudinaryService.uploadFile(file, 'products');
+    return {
+      imageUrl: result.secure_url,
+      publicId: result.public_id,
+    };
   }
 }

@@ -23,6 +23,9 @@ export class Product {
   @Prop({ required: true, min: 0, default: 0, type: Number })
   quantity: number;
 
+  @Prop({ type: String })
+  imageUrl?: string;
+
   @Prop({ type: Types.ObjectId, ref: 'Category', required: true, index: true })
   categoryId: Types.ObjectId;
 

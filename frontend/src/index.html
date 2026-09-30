@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>LMT Group — Store Management</title>
+  <meta name="description" content="Product and Category Management System for LMT Group stores">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Sora (headings) + Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Splash Loading Screen — visible before Angular bootstraps -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-logo">LMT<span>Group</span></div>
+    <div class="splash-spinner"></div>
+  </div>
+
+  <app-root></app-root>
+
+  <!-- Hide splash after Angular is fully bootstrapped -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait for Angular to render, then fade out
+      var observer = new MutationObserver(function(mutations) {
+        var appRoot = document.querySelector('app-root');
+        if (appRoot && appRoot.children.length > 0) {
+          var splash = document.getElementById('splash-screen');
+          if (splash) {
+            splash.classList.add('hidden');
+            setTimeout(function() { splash.remove(); }, 600);
+          }
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.querySelector('app-root'), { childList: true, subtree: true });
+    });
+  </script>
+</body>
+</html>

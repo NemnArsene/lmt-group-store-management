@@ -1,0 +1,32 @@
+<div class="app-shell">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar-nav">
+    <div class="brand">
+      <span class="brand-icon">
+        <mat-icon>storefront</mat-icon>
+      </span>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/products" routerLinkActive="active" class="nav-item" matTooltip="Products">
+        <mat-icon>inventory_2</mat-icon>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Layout -->
+  <div class="main-wrapper">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <h1 class="page-title">LMT<span class="accent">Group</span> Store</h1>
+      <span class="spacer"></span>
+      <div class="top-bar-actions">
+        <span class="last-updated">Last updated: {{ today | date:'mediumDate' }}</span>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

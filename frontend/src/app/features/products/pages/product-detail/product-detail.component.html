@@ -1,0 +1,68 @@
+<div class="header">
+  <div class="breadcrumb">
+    <button mat-icon-button routerLink="/products"><mat-icon>arrow_back</mat-icon></button>
+    <h2>Product Details</h2>
+  </div>
+  @if (product) {
+    <button mat-flat-button color="primary" [routerLink]="['/products', product._id, 'edit']">
+      <mat-icon>edit</mat-icon> Edit Product
+    </button>
+  }
+</div>
+
+@if (isLoading) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+} @else if (product) {
+  <div class="detail-container glass-panel">
+    <div class="image-section">
+      @if (product.imageUrl) {
+        <img [src]="product.imageUrl" alt="{{ product.name }}" class="product-image">
+      } @else {
+        <div class="image-placeholder">
+          <mat-icon>inventory_2</mat-icon>
+          <span>No image available</span>
+        </div>
+      }
+    </div>
+    
+    <div class="info-section">
+      <div class="header-info">
+        <h1 class="product-title">{{ product.name }}</h1>
+        <mat-chip-set>
+          <mat-chip [class.active]="product.isActive" [class.inactive]="!product.isActive" highlighted>
+            {{ product.isActive ? 'Active' : 'Inactive' }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+      
+      <p class="product-sku">SKU: {{ product.sku }}</p>
+      
+      <div class="price-section">
+        <span class="price-label">Price</span>
+        <span class="price-value">{{ product.price | number:'1.0-0' }} {{ product.currency }}</span>
+      </div>
+
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="label">Category</span>
+          <span class="value category-pill">{{ categoryName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Quantity in Stock</span>
+          <span class="value">{{ product.quantity }}</span>
+        </div>
+      </div>
+
+      <div class="description-section">
+        <h3>Description</h3>
+        <p class="description-text">{{ product.description || 'No description provided.' }}</p>
+      </div>
+      
+      <div class="meta-section">
+        <span class="meta-date">Created on {{ product.createdAt | date:'medium' }}</span>
+      </div>
+    </div>
+  </div>
+}

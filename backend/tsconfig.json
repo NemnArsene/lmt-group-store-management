@@ -19,14 +19,12 @@
     "strict": true,
     "strictPropertyInitialization": false,
     "types": ["node"],
-    "ignoreDeprecations": "6.0",
-    "baseUrl": "./",
     "paths": {
-      "@common/*": ["src/common/*"],
-      "@config/*": ["src/config/*"],
-      "@env/*": ["src/env/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
-      "@modules/*": ["src/modules/*"]
+      "@common/*": ["./src/common/*"],
+      "@config/*": ["./src/config/*"],
+      "@env/*": ["./src/env/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
+      "@modules/*": ["./src/modules/*"]
     }
   },
   "include": ["src/**/*", "test/**/*"],

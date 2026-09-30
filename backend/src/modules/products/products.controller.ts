@@ -15,6 +15,8 @@ import { ProductsService } from './products.service.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
 import { PaginationQueryDto } from '@common/dto/pagination-query.dto.js';
+import { ProductNotFoundException } from '@common/exceptions/domain.exceptions.js';
+import { ParseObjectIdPipe } from '@common/pipes/parse-object-id.pipe.js';
 
 @ApiTags('Products')
 @Controller('products')
@@ -41,14 +43,9 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get a product by ID' })
   @ApiResponse({ status: 200, description: 'The product' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseObjectIdPipe) id: string) {
     const product = await this.productsService.findById(id);
     if (!product) {
-      // Import missing, let's just let the service handle throwing or we throw here
-      // But BaseService findById doesn't throw. We should throw.
-      // Wait, let's fix that. BaseService returns T | null.
-      const { ProductNotFoundException } =
-        await import('../../common/exceptions/domain.exceptions.js');
       throw new ProductNotFoundException(id);
     }
     return product;
@@ -60,7 +57,7 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 409, description: 'SKU already exists' })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
   ) {
     return this.productsService.updateProduct(id, updateProductDto);
@@ -71,7 +68,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Soft delete a product by ID' })
   @ApiResponse({ status: 204, description: 'Product deleted successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseObjectIdPipe) id: string) {
     await this.productsService.deleteProduct(id);
   }
 }

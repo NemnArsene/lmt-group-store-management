@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { utilities as nestWinstonModuleUtilities } from 'nest-winston';
 import { AppModule } from './app.module.js';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
+import { AllExceptionsFilter } from '@common/filters/all-exceptions.filter.js';
+import { LoggingInterceptor } from '@common/interceptors/logging.interceptor.js';
 
 async function bootstrap() {
   const logger = WinstonModule.createLogger({
@@ -43,8 +45,11 @@ async function bootstrap() {
     bufferLogs: true,
   });
 
+  const configService = app.get(ConfigService);
+
   // Global prefix
-  app.setGlobalPrefix('api/v1');
+  const apiPrefix = configService.get<string>('app.apiPrefix') ?? 'api/v1';
+  app.setGlobalPrefix(apiPrefix);
 
   // CORS
   app.enableCors({
@@ -54,7 +59,21 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Global exception filter (runs after interceptors catch errors)
+  // Swagger / OpenAPI
+  const swaggerEnabled = configService.get<boolean>('swagger.enabled') ?? true;
+  if (swaggerEnabled) {
+    const swaggerPath = configService.get<string>('swagger.path') ?? 'api-docs';
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle(configService.get<string>('swagger.title') ?? 'Store Management API')
+      .setDescription(configService.get<string>('swagger.description') ?? 'Product management REST API')
+      .setVersion(configService.get<string>('swagger.version') ?? '1.0.0')
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup(swaggerPath, app, document);
+    logger.log(`📖 Swagger UI available at http://localhost:${configService.get('app.port') ?? 3000}/${swaggerPath}`, 'Bootstrap');
+  }
+
+  // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
 
   // Global logging interceptor
@@ -72,12 +91,13 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PORT ?? 3000;
+  const port = configService.get<number>('app.port') ?? 3000;
   await app.listen(port);
   logger.log(
-    `🚀 Server running on http://localhost:${port}/api/v1`,
+    `🚀 Server running on http://localhost:${port}/${apiPrefix}`,
     'Bootstrap',
   );
 }
 
 bootstrap();
+

@@ -1,124 +1,299 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Store Management API — Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> API REST NestJS pour la gestion de produits et catégories.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Table des matières
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Stack technique](#stack-technique)
+- [Architecture du projet](#architecture-du-projet)
+- [Principes appliqués](#principes-appliqués)
+- [Modules](#modules)
+- [Configuration](#configuration)
+- [API Endpoints](#api-endpoints)
+- [Swagger](#swagger)
+- [Lancement local](#lancement-local)
+- [Docker](#docker)
+- [Décisions techniques & justifications](#décisions-techniques--justifications)
 
-## Project setup
+---
 
-```bash
-$ npm install
+## Stack technique
+
+| Outil | Version | Rôle |
+|---|---|---|
+| **NestJS** | 12.x | Framework backend |
+| **TypeScript** | 6.0 | Typage statique strict |
+| **MongoDB** | 8.x | Base de données NoSQL |
+| **Mongoose** | 9.x | ODM pour MongoDB |
+| **Swagger** | `@nestjs/swagger` | Documentation interactive |
+| **Winston** | 3.x | Logging structuré |
+| **Convict** | 6.x | Validation d'environnement |
+| **Cloudinary** | 2.x | Stockage d'images (prêt) |
+| **class-validator** | — | Validation des DTOs |
+| **tsc-alias** | — | Résolution des path aliases au build |
+
+---
+
+## Architecture du projet
+
+```
+backend/src/
+├── main.ts                          # Bootstrap, CORS, Swagger, pipes globaux
+├── app.module.ts                    # Module racine
+├── app.controller.ts                # Health check GET /
+│
+├── common/                          # Code partagé (DRY)
+│   ├── base/
+│   │   ├── base.entity.ts           # Entité de base (timestamps)
+│   │   ├── base.repository.ts       # Repository générique Mongoose
+│   │   └── base.service.ts          # Service générique CRUD
+│   ├── dto/
+│   │   └── pagination-query.dto.ts  # DTO de pagination réutilisable
+│   ├── exceptions/
+│   │   └── domain.exceptions.ts     # Exceptions métier typées
+│   ├── filters/
+│   │   └── all-exceptions.filter.ts # Filtre d'exception global
+│   ├── interceptors/
+│   │   └── logging.interceptor.ts   # Intercepteur de logging HTTP
+│   ├── interfaces/
+│   │   └── paginated-result.interface.ts
+│   ├── pipes/
+│   │   └── parse-object-id.pipe.ts  # Validation MongoDB ObjectId
+│   └── logger/
+│       └── winston.config.ts
+│
+├── config/                          # Configuration centralisée
+│   ├── convict-config.ts            # Source de vérité (Convict)
+│   ├── app.config.ts                # Config app (port, host, etc.)
+│   ├── database.config.ts           # Config MongoDB
+│   ├── swagger.config.ts            # Config Swagger
+│   ├── logger.config.ts             # Config Winston
+│   ├── winston.config.ts            # Transport Winston
+│   └── index.ts                     # Barrel export
+│
+├── env/                             # Fichiers de surcharge par environnement
+│   ├── development.json
+│   ├── staging.json
+│   └── production.json
+│
+├── infrastructure/                  # Services d'infrastructure
+│   └── cloudinary/
+│       ├── cloudinary.module.ts
+│       ├── cloudinary.provider.ts
+│       └── cloudinary.service.ts
+│
+└── modules/                         # Modules métier (feature modules)
+    ├── products/
+    │   ├── schemas/product.schema.ts
+    │   ├── dto/create-product.dto.ts
+    │   ├── dto/update-product.dto.ts
+    │   ├── products.repository.ts
+    │   ├── products.service.ts
+    │   ├── products.controller.ts
+    │   └── products.module.ts
+    │
+    └── categories/
+        ├── schemas/category.schema.ts
+        ├── dto/create-category.dto.ts
+        ├── categories.repository.ts
+        ├── categories.service.ts
+        ├── categories.controller.ts
+        └── categories.module.ts
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## Principes appliqués
 
-# watch mode
-$ npm run start:dev
+### SOLID
 
-# production mode
-$ npm run start:prod
+| Principe | Application |
+|---|---|
+| **S** — Single Responsibility | Chaque classe a un rôle unique : le Controller expose, le Service contient la logique métier, le Repository accède aux données. |
+| **O** — Open/Closed | `BaseRepository` et `BaseService` sont ouverts à l'extension (héritables) mais fermés à la modification. |
+| **L** — Liskov Substitution | `ProductsRepository` et `CategoriesRepository` sont substituables à `BaseRepository<T>`. |
+| **I** — Interface Segregation | Les interfaces (`PaginatedResult`, `PaginationOptions`) sont petites et focalisées. |
+| **D** — Dependency Inversion | Les services dépendent d'abstractions (`BaseRepository<T>`) et non de l'implémentation Mongoose directe. L'injection de dépendances NestJS gère le wiring. |
+
+### DRY (Don't Repeat Yourself)
+
+- **`BaseRepository<T>`** : Toute la logique CRUD Mongoose (create, findOne, findById, findPaginated, updateById, softDelete, exists) est centralisée. Les repositories concrets (`ProductsRepository`, `CategoriesRepository`) n'ajoutent que leur logique spécifique.
+- **`BaseService<T, R>`** : Les opérations CRUD génériques sont déléguées au repository via un service de base. Les services concrets n'ajoutent que la logique de validation métier.
+- **`PaginationQueryDto`** : Un seul DTO pour toute la pagination, avec recherche et tri.
+- **`AllExceptionsFilter`** : Un seul filtre pour normaliser toutes les réponses d'erreur dans un format JSON cohérent.
+
+### Robustesse & Gestion des erreurs
+
+- **Exceptions métier typées** : `ProductNotFoundException`, `DuplicateSkuException`, `CategoryNotFoundException` — chaque erreur a un `code` machine-readable et un `message` humain.
+- **`AllExceptionsFilter`** : Intercepte **toutes** les exceptions (y compris celles de class-validator) et renvoie un format normalisé `{ statusCode, code, message, timestamp, path }`.
+- **`ParseObjectIdPipe`** : Valide les paramètres `:id` avant que Mongoose ne crash avec un `CastError`. Renvoie un 400 propre.
+- **Soft delete** : Les produits et catégories ne sont jamais supprimés physiquement. Un champ `isActive: false` les masque des résultats.
+
+### Performance
+
+- **`lean()`** sur toutes les requêtes de lecture : retourne des objets JavaScript simples au lieu de documents Mongoose hydratés → ~5x plus rapide.
+- **`Promise.all`** dans `findPaginated` : les requêtes `find()` et `countDocuments()` s'exécutent en parallèle → pas de séquentialisation inutile.
+- **Index MongoDB** :
+  - `sku` : index unique pour les lookups rapides et la contrainte d'unicité.
+  - `categoryId` : index pour filtrer les produits par catégorie sans scan complet.
+  - `isActive` : index pour accélérer le filtre de soft-delete.
+  - `{ name: 'text', sku: 'text' }` : index textuel pour la recherche full-text.
+- **Pagination côté serveur** : `skip()` + `limit()` avec un plafond à `100` items par requête.
+- **Pas de N+1** : Aucune relation imbriquée n'est chargée automatiquement. Le `categoryId` est stocké en tant que référence ObjectId mais n'est jamais peuplé (`.populate()` non utilisé), ce qui évite les requêtes en cascade.
+
+### Clarté & Maintenabilité
+
+- **Path aliases** (`@common/`, `@modules/`, `@config/`, `@infrastructure/`) : les imports sont lisibles et indépendants de la profondeur du fichier.
+- **Structure modulaire** : chaque feature est un module NestJS autonome avec son propre schema, DTO, repo, service et controller.
+- **Barrel exports** : `config/index.ts` regroupe toutes les configurations.
+- **Swagger decorators** : chaque endpoint est documenté avec `@ApiOperation`, `@ApiResponse`, et `@ApiTags`.
+
+---
+
+## Modules
+
+### Products (`/api/v1/products`)
+
+CRUD complet avec :
+- Création avec validation d'unicité du SKU
+- Lecture paginée avec recherche textuelle et tri
+- Mise à jour partielle (PATCH) avec re-validation du SKU
+- Suppression douce (soft delete via `isActive: false`)
+
+### Categories (`/api/v1/categories`)
+
+CRUD simplifié :
+- Création avec validation d'unicité du nom
+- Liste de toutes les catégories actives
+- Lecture par ID
+- Suppression douce
+
+---
+
+## Configuration
+
+La configuration est gérée par **Convict** comme source de vérité unique. Les valeurs par défaut sont définies dans `config/convict-config.ts`, et surchargées par les fichiers `env/*.json` selon `NODE_ENV`.
+
+### Variables d'environnement clés
+
+| Variable | Défaut | Description |
+|---|---|---|
+| `NODE_ENV` | `development` | Environnement d'exécution |
+| `PORT` | `3000` | Port du serveur |
+| `MONGODB_URI` | `mongodb://localhost:27017/store` | URI MongoDB |
+| `CLOUDINARY_CLOUD_NAME` | — | Nom du cloud Cloudinary |
+| `CLOUDINARY_API_KEY` | — | Clé API Cloudinary |
+| `CLOUDINARY_API_SECRET` | — | Secret API Cloudinary |
+
+---
+
+## API Endpoints
+
+### Products
+
+| Méthode | Endpoint | Description | Codes |
+|---|---|---|---|
+| `POST` | `/api/v1/products` | Créer un produit | 201, 400, 409 |
+| `GET` | `/api/v1/products` | Lister (paginé, recherche, tri) | 200 |
+| `GET` | `/api/v1/products/:id` | Détail d'un produit | 200, 400, 404 |
+| `PATCH` | `/api/v1/products/:id` | Modifier un produit | 200, 400, 404, 409 |
+| `DELETE` | `/api/v1/products/:id` | Supprimer (soft delete) | 204, 400, 404 |
+
+### Categories
+
+| Méthode | Endpoint | Description | Codes |
+|---|---|---|---|
+| `POST` | `/api/v1/categories` | Créer une catégorie | 201, 400, 409 |
+| `GET` | `/api/v1/categories` | Lister les catégories actives | 200 |
+| `GET` | `/api/v1/categories/:id` | Détail d'une catégorie | 200, 400, 404 |
+| `DELETE` | `/api/v1/categories/:id` | Supprimer (soft delete) | 204, 400, 404 |
+
+### Paramètres de pagination (query string)
+
+| Paramètre | Type | Défaut | Contraintes |
+|---|---|---|---|
+| `page` | number | `1` | >= 1 |
+| `limit` | number | `20` | 1–100 |
+| `search` | string | — | Recherche full-text |
+| `sortBy` | string | `createdAt` | Nom du champ |
+| `sortOrder` | `asc` \| `desc` | `asc` | — |
+
+---
+
+## Swagger
+
+Swagger UI est automatiquement activé en `development` et `staging`.
+
+```
+http://localhost:3000/api-docs
 ```
 
-## Run tests
+Il est désactivé en `production` (configurable via `swagger.enabled` dans `env/production.json`).
+
+---
+
+## Lancement local
+
+### Prérequis
+
+- Node.js >= 22
+- MongoDB en cours d'exécution sur `localhost:27017`
+
+### Installation
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd backend
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Démarrage en développement
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-To add it to this project:
+### Build production
 
 ```bash
-$ npm install @nestjs/observe
+npm run build
+node dist/main.js
 ```
 
-Then follow the [setup guide](https://docs.nestjs.com/observability/overview) - it takes a single import and an app key.
+---
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+## Docker
 
-## Resources
+Le projet inclut un `docker-compose.yml` à la racine avec 3 services :
+- `mongodb` : Base de données MongoDB
+- `backend` : API NestJS
+- `frontend` : Application Angular
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+docker compose up --build
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+## Décisions techniques & justifications
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Pourquoi pas d'authentification ?
 
-## Stay in touch
+La spécification cible un test technique de 3h. L'authentification ajouterait de la complexité sans apporter de valeur sur les critères évalués (qualité du code, performance des requêtes, validation, gestion des erreurs, README). La décision est documentée ici pour montrer qu'elle est **réfléchie**, pas omise.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Pourquoi pas de Clean Architecture stricte (ports/adapters) ?
 
-## License
+YAGNI. Le projet a un seul adaptateur (MongoDB via Mongoose). Ajouter des interfaces abstraites et des couches de mapping n'apporterait que du boilerplate sans bénéfice concret. Le pattern Repository + Service appliqué ici est le juste milieu entre découplage et pragmatisme.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Pourquoi `lean()` systématique ?
+
+Les documents Mongoose hydratés incluent des méthodes et du tracking de changement. Pour des opérations de lecture pure (GET), `lean()` retourne des POJOs ~5x plus rapides et plus légers en mémoire.
+
+### Pourquoi `tsc-alias` et pas `module-alias` ?
+
+`module-alias` patche `require()` au runtime, ce qui pose des problèmes avec les imports ESM. `tsc-alias` réécrit les imports **au moment du build**, ce qui est plus propre et compatible avec `nodenext`.
+
+### Pourquoi Convict plutôt que `.env` seul ?
+
+Convict valide le **schéma** de la configuration au démarrage (types, plages, formats). Un `.env` mal configuré en production crash immédiatement au boot au lieu de silencieusement mal fonctionner.
